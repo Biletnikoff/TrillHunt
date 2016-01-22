@@ -5,7 +5,7 @@ angular.module('thunder.controllers', ['ionic','thunder.services'])
   Controller for the discover page
 */
 
-.controller('DiscoverCtrl', function($scope) {
+.controller('DiscoverCtrl', function($scope, $timeout, User) {
     $scope.products = [
       {
         "name": "LinkedIn ProFinder",
@@ -39,14 +39,41 @@ angular.module('thunder.controllers', ['ionic','thunder.services'])
 
 //Initialize the current product
  $scope.currentProduct = angular.copy($scope.products[0]);
+ 
 
+// fired when we favorite or skip a product
+ $scope.sendFeedback = function(bool){
+  // first, add to favorites if they favorited
+    if (bool) User.addProductToFavorites($scope.currentProduct);
 
+  // set the variable for the correct animation sequence
+ $scope.currentProduct.rated = bool;
+ $scope.currentProduct.hide = true;
+
+ //$timeout to allow animation to complete before changing to the next product
+ $timeout(function(){
+  //set the current product to one of our three products
+  var randomProductIndex = Math.round(Math.random() * ($scope.products.length - 1));
+
+  // update the current product in scope
+  $scope.currentProduct = angular.copy($scope.products[randomProductIndex]);
+ 
+  }, 275)
+
+  }
 })
 /*
   Controller for Favorites
 */
 
-.controller('FavoritesCtrl', function($scope) {})
+.controller('FavoritesCtrl', function($scope, User) {
+  // get the list of our favorites
+  $scope.favorites = User.favorites;
+
+  $scope.removeProduct = function(product, index){
+    User.removeProductFromFavorites(product,index);
+  };
+})
 
 /*
   Controller for Tabs
